@@ -1,0 +1,37 @@
+- hosts: all
+  become: yes
+  become_user: root
+  tasks:
+    - name: テスト用ファイルのコピー
+      copy: src=/Users/higak/test dest=/root/
+    - name: commandのテスト
+      command: mkdir testdir creates=/root/testdir/
+    - name: commandのテスト続
+      command: mkdir testfile chdir=/root/testdir/ creates=/root/testdir/testfile
+    - name: install hugo
+      dnf:
+        name:
+          - hugo
+        state: present
+    - name: install git
+      dnf:
+        name:
+          - git
+    - name: create new site
+      command: hugo new site {{ site_name }} creates=/root/{{ site_name }}
+    - name: copy config.toml
+      become: yes
+      copy:
+        src: config.toml
+        dest: /root/{{ site_name }}/config.toml
+        owner: root
+        group: root
+    - name: git init
+      become: yes
+      command: git init chdir=/root/{{ site_name }} creates=/root/{{ site_name }}/.git/
+    - name: git submodule
+      become: yes
+      command: git submodule add https://github.com/theNewDynamic/gohugo-theme-ananke.git themes/ananke chdir=/root/{{ site_name }}/ creates=/root/{{ site_name }}/themes/ananke
+    - name: create sample page
+      become: yes
+      command: hugo new /root/{{ site_name }}/content/posts/my-first-posts.md chdir=/root/{{ site_name }} creates=/root/{{ site_name }}/content/posts/my-first-posts.md

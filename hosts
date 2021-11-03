@@ -1,0 +1,4 @@
+vm ansible_user=root ansible_port=5022 ansible_host=localhost
+
+[all:vars]
+site_name="my_first_site"
